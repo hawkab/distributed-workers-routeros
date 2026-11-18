@@ -42,7 +42,7 @@ def build(out,tag,commit):
         # builder; the resulting ARM64 image is tested on supported hardware.
         env=dict(os.environ,WORKER_SUPERVISOR=str(ROOT/'container/supervise.php'))
         probe=subprocess.run(['php',str(ROOT/'tests/supervisor.php')],env=env,capture_output=True)
-        if probe.returncode or probe.stdout.count(b'ok:')!=4:raise RuntimeError('container_process_tests_failed')
+        if probe.returncode or probe.stdout.count(b'ok:')!=5:raise RuntimeError('container_process_tests_failed')
         print(probe.stdout.decode(),end='')
         layer=work/'layer.tar'
         def metadata(info):

@@ -33,6 +33,45 @@ docker run --rm -v "$PWD:/workspace:ro" -v "$PWD/dist:/out" -w /workspace \
 `container/Dockerfile` is also available for a native ARM64 Docker builder after
 preparing `.build/sdk`. It uses the same PHP adapter and supervisor.
 
+## Small operator runtimes
+
+Keep application dependencies outside the public image. `tools/pack_runtime.py`
+builds a private bundle from an existing target filesystem. It resolves ELF
+dependencies with `readelf`, without executing foreign binaries, and reuses a
+library from the base image only when its SHA-256 matches. Check the resulting
+`runtime-manifest.json` against the actual base before deployment.
+
+```sh
+python3 -B tools/pack_runtime.py --source /private/target-root \
+  --output /private/runtime --archive /private/runtime.tar \
+  --base-image /private/base-image.tar.gz \
+  --executable usr/bin/python3 --python-stdlib usr/lib/python3.12 \
+  --python-package /private/application-package
+```
+
+Python source and package data stay compressed in `usr/lib/python312.zip` and
+are imported directly. Native extensions and their libraries remain ordinary
+files. Bytecode caches are omitted; set `PYTHONDONTWRITEBYTECODE=1`. Module
+exclusions are explicit operator choices, rather than a list inferred from one
+successful document. Do not copy a second operating system or package installer.
+
+For frequently imported modules, run `tools/warm_python.py --archive ... --module
+application.module` once with the target Python interpreter in a staging bundle.
+It adds checked-hash bytecode while preserving the source and package data, so
+startup does not repeatedly compile the same modules. Other modules still use
+their source fallback. Reseal the bundle manifest after warming; measure both
+startup time and the resulting installed size before deployment.
+
+Install through the sequential archive, preserving its symbolic links. Copying
+loose files through a share that follows links can silently duplicate libraries.
+The archive uses neutral ownership; extraction with `tar --no-same-owner` assigns
+the target operator's identity rather than retaining a build host's user ID.
+
+Put private configuration and durable state on local persistent bind mounts,
+outside the replaceable container root. Scratch space may use `/dev/shm`; budget
+its actual capacity and RAM separately. Images, update staging, retained results
+and working data all count toward the device's available space.
+
 ## RouterOS installation
 
 Tested on RouterOS 7.24.5, ARM64. Install the container package and enable container
@@ -83,6 +122,12 @@ python3 -B -m unittest discover -s tests -v
 python3 -B -m unittest discover -s ci/tests -v
 ```
 
+The adapter keeps one authenticated SDK process alive between tasks, preserving
+its connection and executable fingerprint cache. Program hashes are still checked
+before execution. Maintenance and stop requests drain the current task before
+that process exits; signed runtime updates select a fresh process.
+
 The process tests check draining on shutdown, immediate continuation after useful
-work, restart after a signed runtime update, and the persistent maintenance barrier. Hardware acceptance is performed
+work, restart after a signed runtime update, the persistent maintenance barrier,
+and reuse of one runtime for several tasks. Hardware acceptance is performed
 before publishing a new adapter implementation.

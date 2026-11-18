@@ -43,6 +43,11 @@ try {
     usleep(100000);if(file_get_contents($root.'/maint-trace')!=="done\n")throw new RuntimeException('maintenance_admitted_more_work');
     unlink($root.'/maintenance');waitFor(fn()=>!is_file($root.'/adapter-drained'));finishProbe($p);
     echo "ok: maintenance drains and blocks claims across restarts\n";
+    [$p] = startProbe($root, $supervisor, '$config=json_decode(file_get_contents($argv[1]),true);$r=getenv("PROBE_ROOT");file_put_contents($r."/boots","1",FILE_APPEND);$worker=new class($r){public object $store;private int $count=0;public function __construct(private string $r){$this->store=(object)["data"=>["update_check_at"=>time()]];}public function tick():bool{$this->count++;file_put_contents($this->r."/persistent-count",(string)$this->count);if($this->count===3)file_put_contents($this->r."/maintenance","1");return true;}};$updater=new stdClass();$busy=true;');
+    waitFor(fn()=>is_file($root.'/adapter-drained'));
+    if(file_get_contents($root.'/boots')!=="1" || file_get_contents($root.'/persistent-count')!=="3")throw new RuntimeException('runtime_was_rebootstrapped_between_tasks');
+    finishProbe($p);
+    echo "ok: one authenticated runtime handles multiple tasks without rebootstrap\n";
 
 } finally {
     foreach (glob($root.'/*') as $file) { unlink($file); } rmdir($root);
