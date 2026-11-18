@@ -1,0 +1,19 @@
+{
+  "source_catalog": "https://gitflic.ru/project/notyfile/notyfile-releases/release",
+  "source_release": "https://gitflic.ru/project/notyfile/notyfile-releases/release/75f84094-25e4-4845-9388-59c662b217f5",
+  "fixtures": [
+    {
+      "file": "gitflic-public-releases.html",
+      "raw_sha256": "2903ecaf3f8fef3f4d06c0119e5df6a8e58e7d4af06ff82a3a596c0cae7812d8",
+      "fixture_sha256": "a1ef0ef6119fcd373ec97a34fbb0c91aa03da9c4ca8e9f577649eefcc5948cd7",
+      "transformation": "public release DOM fragment only; navigation/CSRF/scripts omitted"
+    },
+    {
+      "file": "gitflic-public-release.html",
+      "raw_sha256": "7804c10089fae2114bd2fed096e6c9579b289c23f747c5dd07bc7cfe264cdd7b",
+      "fixture_sha256": "f523e4314b28ad3aa0b2c183dbf1d6aa6f9adc3039751746d30ac459385d7d69",
+      "transformation": "public release DOM fragment only; navigation/CSRF/scripts omitted"
+    }
+  ],
+  "receipt_verified_utc": "2026-11-16T15:42:14.362657+00:00"
+}

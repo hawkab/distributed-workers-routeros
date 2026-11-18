@@ -1,0 +1,30 @@
+name: Component release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to publish or resume
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      FLEET_RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Publisher regression tests
+        run: python3 -m unittest discover -s ci/tests -v
+      - name: Verify canonical artifacts and publish this mirror
+        run: python3 -B ci/router_release.py release --provider github

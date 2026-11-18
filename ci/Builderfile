@@ -1,0 +1,7 @@
+FROM alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+ARG ALPINE_MIRROR=https://mirror.yandex.ru/mirrors/alpine
+RUN printf '%s\n' "${ALPINE_MIRROR}/v3.22/main" "${ALPINE_MIRROR}/v3.22/community" > /etc/apk/repositories \
+ && apk add --no-cache python3 openssl git php84 php84-pcntl php84-posix \
+ && ln -s /usr/bin/php84 /usr/local/bin/php
+
+COPY .build/runtime-cache/ /opt/fleet-runtime-cache/

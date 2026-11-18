@@ -1,0 +1,41 @@
+stages:
+  - build
+  - release
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - when: never
+
+container_unsigned:
+  stage: build
+  tags: [fleetci]
+  image:
+    name: fleet-router-image-builder:1
+    pull_policy: never
+  variables:
+    PHP_BINARY: /usr/bin/php
+  script:
+    - python3 -B -m unittest discover -s ci/tests -v
+    - python3 -B ci/container_release.py unsigned --provider gitflic --tag "$CI_COMMIT_TAG"
+  artifacts:
+    expire_in: never
+    when: always
+    paths: [dist/unsigned/, dist/test-results-*.log]
+
+container_sign_release:
+  stage: release
+  tags: [fleetsigning]
+  image:
+    name: '$FLEET_SIGNING_IMAGE'
+    pull_policy: never
+  needs: [container_unsigned]
+  variables:
+    FLEET_SIGNING_DIRECTORY: /run/fleet-signing
+    FLEET_GPG_PRIVATE_KEY_FILE: /run/fleet-signing/ci-bot-private.asc
+  script:
+    - python3 -B ci/container_release.py release --provider gitflic --tag "$CI_COMMIT_TAG"
+  artifacts:
+    expire_in: never
+    when: always
+    paths: [dist/]

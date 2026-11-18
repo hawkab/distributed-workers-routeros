@@ -1,0 +1,10 @@
+{
+  "gateway": "https://gateway.example.invalid",
+  "token": "configure-privately",
+  "state_directory": "/state",
+  "install_directory": "/state/runtime",
+  "chunk_bytes": 262144,
+  "poll_seconds": 5,
+  "update_poll_seconds": 900,
+  "commands": {}
+}
