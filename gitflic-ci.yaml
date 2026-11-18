@@ -17,7 +17,7 @@ container_unsigned:
     PHP_BINARY: /usr/bin/php
   script:
     - python3 -B -m unittest discover -s ci/tests -v
-    - python3 -B ci/container_release.py unsigned --provider gitflic --tag "$CI_COMMIT_TAG"
+    - python3 -B ci/router_release.py unsigned --provider gitflic --tag "$CI_COMMIT_TAG"
   artifacts:
     expire_in: never
     when: always
@@ -34,7 +34,7 @@ container_sign_release:
     FLEET_SIGNING_DIRECTORY: /run/fleet-signing
     FLEET_GPG_PRIVATE_KEY_FILE: /run/fleet-signing/ci-bot-private.asc
   script:
-    - python3 -B ci/container_release.py release --provider gitflic --tag "$CI_COMMIT_TAG"
+    - python3 -B ci/router_release.py release --provider gitflic --tag "$CI_COMMIT_TAG"
   artifacts:
     expire_in: never
     when: always
