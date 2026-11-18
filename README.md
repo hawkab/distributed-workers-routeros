@@ -104,6 +104,19 @@ after an automatic container restart. Persistent completions stay on the state
 volume. Only after this barrier may RouterOS settings or the image be changed.
 Remove `/state/maintenance` to resume. The marker disappears before the next tick.
 
+On a device with limited flash, budget the update archive as well as the installed
+runtime. An in-place RouterOS repull can exhaust temporary space. Download and
+verify the complete signed image first, drain/stop the worker, then remove only
+the old container root and create its replacement from the verified archive.
+Reuse the existing interface and persistent local bind mounts. Check the new
+image identity and worker state before resuming; remove the staging archive after
+successful installation. The worker identity and pending results belong on the
+separate persistent volume, never inside the replaceable image root.
+
+Avoid an inherited small `/dev/shm` ceiling that cannot hold a valid task and its
+metadata. Its ceiling can match the container's actual RAM allocation; tmpfs uses
+memory as data is written rather than reserving its full ceiling at startup.
+
 Do not change settings or use RouterOS's stop command during active work: its
 separate stop-time can force termination. A power loss is recovered through
 persistent state and the queue lease. SIGTERM also drains a current tick without
