@@ -8,6 +8,8 @@ if (!isset($worker, $updater, $config) || !is_object($worker) || !method_exists(
     // Older/custom bootstraps still retain the original one-tick contract.
     exit(($busy ?? false) ? 76 : 0);
 }
+if (isset($worker->client) && property_exists($worker->client, 'waitApplied')) { $worker->client->config['claim_wait_seconds'] = 20; }
+$pending = false;
 $state = $config['state_directory'];
 $stop = getenv('WORKER_STOP_FILE') ?: '';
 $shouldStop = static function () use ($state, $stop): bool {
@@ -16,7 +18,7 @@ $shouldStop = static function () use ($state, $stop): bool {
 };
 try {
     while (!$shouldStop()) {
-        if (!$busy) {
+        if (!$busy && ($pending || (!isset($worker->client) || !property_exists($worker->client, 'waitApplied')))) {
             $until = microtime(true) + ($config['poll_seconds'] ?? 5);
             while (microtime(true) < $until && !$shouldStop()) {
                 usleep((int)min(100000, max(1, ($until - microtime(true)) * 1000000)));
@@ -24,6 +26,7 @@ try {
         }
         if ($shouldStop()) { break; }
         try {
+            $pending = false;
             $busy = $worker->tick();
             if (time() >= ($worker->store->data['update_check_at'] ?? 0) + ($config['update_poll_seconds'] ?? 900)) {
                 $worker->store->data['update_check_at'] = time();
@@ -34,7 +37,7 @@ try {
         } catch (FleetPending $error) {
             fwrite(STDERR, json_encode(['event' => 'worker_pending', 'code' => $error->getMessage()]) . "\n");
             if ($error->getMessage() === 'actual_host_window_yield') { exit(0); }
-            $busy = false;
+            $busy = false; $pending = true;
         }
     }
 } catch (Throwable $error) {
