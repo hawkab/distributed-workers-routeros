@@ -144,3 +144,14 @@ The process tests check draining on shutdown, immediate continuation after usefu
 work, restart after a signed runtime update, the persistent maintenance barrier,
 and reuse of one runtime for several tasks. Hardware acceptance is performed
 before publishing a new adapter implementation.
+
+## Adaptive execution
+
+The adapter starts the signed SDK's managed process pool. Each slot uses its own
+durable state while retaining the single worker identity. CPU and memory
+pressure stop admission without killing productive native jobs. Maintenance and
+container stop drain the pool before the adapter barrier is written. The signed
+SDK retains its own update chain independently of the minimal ARM64 image.
+Configure private `concurrency.mode` as `router`; CPU/job and memory/job are
+admission reservations and can be based on measured workloads. No application
+schema or task-specific parser is part of this image.

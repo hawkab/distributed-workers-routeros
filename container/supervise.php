@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-// One durable SDK tick per child. PID 1 drains the current tick on stop;
+// One managed SDK runtime per child. PID 1 drains all productive slots on stop;
 // it never forwards a stop signal to a healthy calculation or starts another.
 if (PHP_SAPI !== 'cli' || !extension_loaded('pcntl')) { exit(2); }
 $config = $argv[1] ?? '/config/worker.local.json';
@@ -33,7 +33,7 @@ while (!$stopping) {
     if ($pid === -1) { fwrite(STDERR, "{\"event\":\"fork_unavailable\"}\n"); exit(1); }
     if ($pid === 0) {
         foreach ([SIGTERM, SIGINT] as $signal) { pcntl_signal($signal, SIG_DFL); }
-        pcntl_exec(PHP_BINARY, [$tick, $config, '--once'], array_merge(getenv(), ['WORKER_STOP_FILE' => $stopFile]));
+        pcntl_exec(PHP_BINARY, [$tick, $config], array_merge(getenv(), ['WORKER_STOP_FILE' => $stopFile]));
         exit(127);
     }
     do { $waited = pcntl_waitpid($pid, $status); } while ($waited === -1 && pcntl_get_last_error() === PCNTL_EINTR);

@@ -1,6 +1,6 @@
 {
   "component": "worker-portable",
-  "version": "0.7.2",
-  "version_code": 7,
-  "sha256": "780fcaa00fa56640b68d0a09b97483a7a0c2e17aab901fc929de87c4dfbb0776"
+  "version": "0.8.0",
+  "version_code": 10,
+  "sha256": "5d2c5573eed29a2de6e620db4afcb2895c1718d3387b769448b8693be9209401"
 }
