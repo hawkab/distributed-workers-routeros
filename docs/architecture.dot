@@ -1,0 +1,33 @@
+// Generated from platform/tools/render-architecture.py.
+// Render with neato -n2 -Tsvg architecture.dot -o architecture.svg.
+digraph Fleet {
+graph [layout=neato, bgcolor="white", pad="0.25", splines=true, overlap=true,
+fontname="DejaVu Sans", fontsize=18, label="Distributed Workers — UML components", labelloc=t];
+node [shape=component, style="filled", fillcolor="#f1f4f8", color="#8391a5",
+fontcolor="#334155", fontname="DejaVu Sans", fontsize=12, width=3.1, height=1.35, fixedsize=true];
+edge [color="#64748b", fontcolor="#475569", fontname="DejaVu Sans", fontsize=10, arrowsize=0.7];
+"gateway" [pos="550,540!", label="Gateway\nother repository\ngateway\nHTTPS API\nadmission & leases\ndurable receipts"];
+"worker-portable" [pos="170,260!", label="Portable worker\nother repository\nworker-portable\nNode.js / PHP\nexecution slots\ncheckpoint & outbox"];
+"worker-android" [pos="550,260!", label="Android worker\nother repository\nworker-android\nforeground service\nexecution slots\nSQLite & updater"];
+"worker-routeros" [fillcolor="#e7f0ff", color="#2058ad", fontcolor="#133d78", penwidth=2.5, pos="930,260!", label="RouterOS adapter\nTHIS REPOSITORY\nworker-routeros\nARM64 container\nPHP SDK supervisor\npersistent mounts"];
+"protocol" [pos="170,760!", label="Protocol\nother repository\nprotocol\nJSON Schemas\nportable JS ABI\neffect & artifact contracts"];
+"platform" [pos="550,760!", label="Platform\nother repository\nplatform\ndeployment recipes\ncomponent composition\nrelease CI tools"];
+application [shape=box, pos="170,540!", height=0.8, fillcolor="#fffaf0", label="External application\nsubmit jobs / consume results"];
+infrastructure [shape=box3d, pos="930,540!", height=1.5, label="Durable infrastructure\nPostgreSQL: canonical ledger\nRabbitMQ: commands + references\nFilesystem: sealed artifacts"];
+source [shape=box, pos="170,45!", height=0.8, fillcolor="#fffaf0", label="External HTTP source\noperator-selected data"];
+releases [shape=folder, pos="930,760!", height=0.8, label="Signed release mirrors\nGitea → GitFlic → GitHub"];
+legend [shape=plain, pos="690,20!", label="Blue + THIS REPOSITORY = owned here\nGrey = another repository / external infrastructure\nSolid: runtime   Dashed: contract or reuse   Dotted: deployment/update"];
+"application" -> "gateway" [style=solid, pos="e,435,540 284,540 330,540 380,540 428,540", label="HTTPS", lp="360,557"];
+"gateway" -> "infrastructure" [style=solid, pos="e,815,540 665,540 710,540 765,540 808,540", label="transactions / streams", lp="740,557"];
+"worker-portable" -> "gateway" [style=solid, pos="e,500,489 170,310 170,410 500,395 500,482", label="outbound HTTPS: claim / heartbeat / result", lp="320,408", dir=both];
+"worker-android" -> "gateway" [style=solid, pos="e,550,489 550,310 550,365 550,425 550,482", label="outbound HTTPS", lp="625,390", dir=both];
+"worker-routeros" -> "worker-portable" [style=dashed, pos="e,284,260 930,209 930,135 300,135 291,260", label="reuses PHP SDK", lp="550,155"];
+"worker-portable" -> "source" [style=solid, pos="e,170,77 170,209 170,165 170,120 170,84", label="HTTP stream", lp="106,140"];
+"worker-android" -> "source" [style=solid, pos="e,286,45 500,209 500,95 340,45 293,45", label="HTTP stream", lp="390,90"];
+"protocol" -> "gateway" [style=dashed, pos="e,490,591 170,709 170,665 490,660 490,598", label="wire contract", lp="330,665"];
+"platform" -> "gateway" [style=dotted, pos="e,550,591 550,709 550,675 550,630 550,598", label="deployment recipes", lp="640,651"];
+"platform" -> "releases" [style=dotted, pos="e,815,760 665,760 715,760 760,760 808,760", label="release composition", lp="740,778"];
+"releases" -> "worker-routeros" [style=dotted, pos="e,1045,260 1045,760 1110,760 1110,260 1052,260", label="signed image", lp="1060,620"];
+"releases" -> "worker-portable" [style=dotted, pos="e,80,310 815,729 730,670 20,670 20,670 20,580 20,310 73,310", label="signed SDK updates", lp="65,655"];
+"releases" -> "worker-android" [style=dotted, pos="e,665,280 815,729 760,680 760,380 672,284", label="signed APK updates", lp="780,420"];
+}
