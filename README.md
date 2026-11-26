@@ -8,7 +8,7 @@ operator; application-specific code and data do not belong in this repository.
 <!-- fleet-architecture:start -->
 ## Architecture and repository boundary
 
-![Shared UML component architecture; worker-routeros is highlighted](docs/architecture.svg)
+![Shared UML component architecture; worker-routeros is highlighted](docs/architecture.png)
 
 All six repositories show the same system. **Blue and “THIS REPOSITORY” identify the component owned here**; grey boxes show sibling repositories or external infrastructure. Solid arrows carry runtime traffic, dashed arrows show contracts or reuse, and dotted arrows show deployment or updates. The protocol applies to the gateway and both execution SDKs; deployment arrows show the principal composition entry points.
 
@@ -16,7 +16,7 @@ This repository owns the minimal ARM64 container, supervisor, persistent-mount c
 
 Implementation: [container supervisor](container/), [image builder](tools/build.py), [bootstrap SDK pin](runtime.lock.json), [example configuration](worker.example.json).
 
-[Open the SVG](docs/architecture.svg) · [Editable DOT source](docs/architecture.dot). The common model and Python-only SVG renderer live in [platform](https://gitflic.ru/project/distributed-workers/platform). From its checkout, `python3 -B tools/render-architecture.py --workspace ../..` regenerates every ownership view in a workspace containing `repos/<component>`. No diagram service or production configuration is needed.
+[SVG source](docs/architecture.svg) · [Editable DOT source](docs/architecture.dot). The common model and Python-only SVG renderer live in [platform](https://gitflic.ru/project/distributed-workers/platform). From its checkout, `python3 -B tools/render-architecture.py --workspace ../.. --png` regenerates every ownership view in a workspace containing `repos/<component>`. PNG previews work on forges that serve SVG as text. SVG generation uses Python alone; PNG rendering uses a local Chromium browser. No diagram service or production configuration is needed.
 <!-- fleet-architecture:end -->
 
 The worker connects outbound, receives its server-assigned identity and reports
