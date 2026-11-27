@@ -1,0 +1,21 @@
+// Shared model: platform/tools/render-architecture.py
+digraph Architecture {
+graph [rankdir=TB, compound=true];
+node [fontname="sans-serif"];
+label="Where the repository fits \u2014 UML package dependencies\nworker-routeros: Container packaging and supervision of the PHP engine";labelloc=t;
+subgraph "cluster_implementations" {
+label="Runtime code"; style=dashed;
+"anchor_implementations" [shape=point,width=0,style=invis];
+  "gateway" [shape=tab,label="gateway\nAPI, leases, canonical results"];
+  "worker-portable" [shape=tab,label="worker-portable\nNode / PHP SDKs"];
+  "worker-android" [shape=tab,label="worker-android\nAndroid service / executor"];
+}
+"protocol" [shape=tab,label="protocol\nJSON Schemas / portable JS ABI\nContract, not a service"];
+"platform" [shape=tab,label="platform\nDeployment recipes / release pins\nIncludes protocol version pin"];
+"worker-routeros" [shape=tab,label="worker-routeros\nARM64 image / supervisor\nPackages the PHP SDK locally\nTHIS REPOSITORY",color="#2058ad",style=filled,fillcolor="#e8f0ff",penwidth=2.5];
+"gateway" -> "protocol" [label="conforms to contract",style=dashed,arrowhead=open];
+"worker-portable" -> "protocol" [label="contract",style=dashed,arrowhead=open];
+"worker-android" -> "protocol" [label="conforms to contract",style=dashed,arrowhead=open];
+"platform" -> "anchor_implementations" [label="composes releases",style=dashed,arrowhead=open,lhead="cluster_implementations"];
+"worker-routeros" -> "worker-portable" [label="packages PHP SDK",style=dashed,arrowhead=open];
+}
